@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { NavLink } from "react-router";
+import Home from "../Home/Home";
 
 const Navbar = () => {
   // Check for user's preferred theme or saved preference
@@ -42,15 +44,13 @@ const Navbar = () => {
     );
     document.documentElement.style.setProperty(
       "--bg-color",
-      isDarkMode ? "#1e1b4b" : "#f0fdf4"
+      isDarkMode ? "#1e1b4b" : "#CCFFCC"
     );
     document.documentElement.style.setProperty(
       "--text-color",
       isDarkMode ? "#e9d5ff" : "#166534"
     );
-
-    // You could also set background color of body directly for immediate effect
-    document.body.style.backgroundColor = isDarkMode ? "#1e1b4b" : "#f0fdf4";
+    document.body.style.backgroundColor = isDarkMode ? "#1e1b4b" : "#CCFFCC";
     document.body.style.color = isDarkMode ? "#e9d5ff" : "#166534";
     document.body.style.transition =
       "background-color 0.5s ease, color 0.5s ease";
@@ -71,11 +71,11 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Projects", href: "#projects" },
-    { name: "Skills", href: "#skills" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/home" },
+    { name: "About", href: "/about" },
+    { name: "Projects", href: "/projects" },
+    { name: "Skills", href: "/skills" },
+    { name: "Contact", href: "/contact" },
   ];
 
   return (
@@ -83,8 +83,8 @@ const Navbar = () => {
       className={`fixed w-full z-50 transition-all duration-500 ${
         isScrolled
           ? isDarkMode
-            ? "bg-purple-900/90 backdrop-blur-md shadow-lg shadow-purple-500/20"
-            : "bg-green-50/90 backdrop-blur-md shadow-lg shadow-green-500/20"
+            ? "bg-purple-900/60 backdrop-blur-md shadow-lg shadow-purple-500/20"
+            : "bg-green-200/60 backdrop-blur-md shadow-lg shadow-green-500/20"
           : isDarkMode
           ? "bg-transparent"
           : "bg-transparent"
@@ -99,10 +99,10 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
             <span
-              className={`font-bold text-3xl tracking-tight transition-all duration-500 ${
+              className={`font-bold text-3xl hover:text-4xl tracking-tight transition-all duration-500 ${
                 isDarkMode
-                  ? "text-purple-300 hover:text-purple-200"
-                  : "text-green-600 hover:text-green-700"
+                  ? "text-purple-300 hover:text-red-500"
+                  : "text-green-600 hover:text-blue-700"
               }`}
             >
               <span className="inline-block animate-bounce ">Khairul Anam</span>
@@ -112,18 +112,18 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-2 lg:space-x-4">
             {navLinks.map((link, index) => (
-              <a
+              <NavLink
                 key={link.name}
-                href={link.href}
+                to={link.href}
                 className={`px-3 py-2 rounded-md text-md font-medium transition-all duration-300 transform hover:scale-105 ${
                   isDarkMode
-                    ? "text-purple-200 hover:text-white hover:bg-purple-800"
-                    : "text-green-700 hover:text-green-900 hover:bg-green-100"
+                    ? "text-purple-200 hover:text-red-500 hover:bg-purple-300"
+                    : "text-green-700 hover:text-blue-900 hover:bg-green-100"
                 }`}
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 {link.name}
-              </a>
+              </NavLink>
             ))}
 
             {/* Theme Toggle Button */}
@@ -148,36 +148,22 @@ const Navbar = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  ></path>
-                </svg>
-              ) : (
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
                     d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
                   ></path>
                 </svg>
-              )}
+              ) : null}
             </button>
             <button
               onClick={() => {
                 const link = document.createElement("a");
-                link.href = "https://drive.google.com/file/d/1AewVXgJljlpH8V5W66kFpDL3cQb613yq/view?usp=sharing"; // Replace with your actual PDF link
+                link.href =
+                  "https://drive.google.com/file/d/1AewVXgJljlpH8V5W66kFpDL3cQb613yq/view?usp=sharing"; // Replace with your actual PDF link
                 link.download = "Resume.pdf"; // The name of the downloaded file
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
               }}
-              className={`ml-4 px-4 py-2 rounded-md text-md font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
+              className={`ml-4 px-4 py-2 rounded-md text-md font-medium transition-all duration-300 transform hover:scale-125 hover:shadow-lg ${
                 isDarkMode
                   ? "bg-purple-500 hover:bg-purple-400 text-white shadow-purple-500/50"
                   : "bg-green-500 hover:bg-green-400 text-white shadow-green-500/50"
