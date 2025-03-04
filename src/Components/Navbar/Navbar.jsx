@@ -44,13 +44,13 @@ const Navbar = () => {
     );
     document.documentElement.style.setProperty(
       "--bg-color",
-      isDarkMode ? "#1e1b4b" : "#CCFFCC"
+      isDarkMode ? "#1e1b4b" : "##c8ffe6"
     );
     document.documentElement.style.setProperty(
       "--text-color",
       isDarkMode ? "#e9d5ff" : "#166534"
     );
-    document.body.style.backgroundColor = isDarkMode ? "#1e1b4b" : "#CCFFCC";
+    document.body.style.backgroundColor = isDarkMode ? "#1e1b4b" : "#c8ffe6";
     document.body.style.color = isDarkMode ? "#e9d5ff" : "#166534";
     document.body.style.transition =
       "background-color 0.5s ease, color 0.5s ease";
@@ -71,7 +71,7 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: "Home", href: "/home" },
+    { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Projects", href: "/projects" },
     { name: "Skills", href: "/skills" },
