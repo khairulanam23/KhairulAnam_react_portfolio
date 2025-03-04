@@ -5,12 +5,14 @@ import Footer from "../Footer/Footer";
 
 const Root = () => {
     return (
-        <div>
-            <Navbar></Navbar>
-            <Outlet></Outlet>
-            <Footer></Footer>
-        </div>
+      <div className="flex flex-col min-h-screen">
+        <Navbar />
+        <main className="flex-grow pt-10 md:pt-10 lg:pt-10">
+          <Outlet />
+        </main>
+        <Footer />
+      </div>
     );
-};
-
-export default Root;
+  };
+  
+  export default Root;

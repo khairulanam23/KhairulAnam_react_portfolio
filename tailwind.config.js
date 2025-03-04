@@ -7,6 +7,15 @@ export default {
   darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
+      screens: {
+
+        'sm': '640px', // Small screens
+  
+        'md': '768px', // Medium screens
+  
+        'lg': '1440px', // Large screens
+  
+      },
       colors: {
         // Custom green colors for light theme
         green: {

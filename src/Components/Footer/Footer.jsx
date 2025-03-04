@@ -41,7 +41,7 @@ const Footer = () => {
     <footer
       className="p-6 md:p-10 rounded-xl shadow-lg flex flex-col items-center space-y-6 w-full"
       style={{
-        backgroundColor: "var(--bg-color)",
+        backgroundColor: "color-mix(in srgb, var(--bg-color), black 5%)",
         color: "var(--text-color)",
       }}
     >

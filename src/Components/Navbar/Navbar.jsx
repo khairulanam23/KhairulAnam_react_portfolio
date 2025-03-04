@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router";
-import Home from "../Home/Home";
 
 const Navbar = () => {
   // Check for user's preferred theme or saved preference
@@ -44,14 +43,14 @@ const Navbar = () => {
     );
     document.documentElement.style.setProperty(
       "--bg-color",
-      isDarkMode ? "#1e1b4b" : "##c8ffe6"
+      isDarkMode ? "#1e1b4b" : "#d1ffe8"
     );
     document.documentElement.style.setProperty(
       "--text-color",
-      isDarkMode ? "#e9d5ff" : "#166534"
+      isDarkMode ? "#e9d5ff" : "#145229"
     );
-    document.body.style.backgroundColor = isDarkMode ? "#1e1b4b" : "#c8ffe6";
-    document.body.style.color = isDarkMode ? "#e9d5ff" : "#166534";
+    document.body.style.backgroundColor = isDarkMode ? "#1e1b4b" : "#d1ffe8";
+    document.body.style.color = isDarkMode ? "#e9d5ff" : "#145229";
     document.body.style.transition =
       "background-color 0.5s ease, color 0.5s ease";
   }, [isDarkMode]);
@@ -172,8 +171,8 @@ const Navbar = () => {
               onClick={() => {
                 const link = document.createElement("a");
                 link.href =
-                  "https://drive.google.com/file/d/1AewVXgJljlpH8V5W66kFpDL3cQb613yq/view?usp=sharing"; // Replace with your actual PDF link
-                link.download = "Resume.pdf"; // The name of the downloaded file
+                  "https://drive.google.com/file/d/1AewVXgJljlpH8V5W66kFpDL3cQb613yq/view?usp=sharing";
+                link.download = "Resume.pdf";
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
