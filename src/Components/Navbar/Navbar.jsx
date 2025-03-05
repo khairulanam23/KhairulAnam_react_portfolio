@@ -295,6 +295,15 @@ const Navbar = () => {
             </a>
           ))}
           <button
+            onClick={() => {
+              const link = document.createElement("a");
+              link.href =
+                "https://drive.google.com/file/d/1AewVXgJljlpH8V5W66kFpDL3cQb613yq/view?usp=sharing";
+              link.download = "Resume.pdf";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
             className={`w-full mt-3 px-4 py-2 rounded-md text-base font-medium transition-all duration-300 transform hover:scale-105 ${
               isDarkMode
                 ? "bg-purple-500 hover:bg-purple-400 text-white"
