@@ -47,7 +47,11 @@ const Navbar = () => {
     );
     document.documentElement.style.setProperty(
       "--text-color",
-      isDarkMode ? "#e9d5ff" : "#145229"
+      isDarkMode ? "#e9d5ff" : "#145229" 
+    );
+    document.documentElement.style.setProperty(
+      "--font-color",
+      isDarkMode ? "#000000" : "#145229" //e9d5ff
     );
     document.body.style.backgroundColor = isDarkMode ? "#1e1b4b" : "#d1ffe8";
     document.body.style.color = isDarkMode ? "#e9d5ff" : "#145229";

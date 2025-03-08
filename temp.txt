@@ -1,0 +1,72 @@
+  const skills = [
+    {
+      icon: <FaJs />,
+      title: "JavaScript & TypeScript",
+      description:
+        "Proficient in modern JavaScript and TypeScript, building interactive and dynamic web applications with strong type safety and scalable architecture.",
+      proficiency: 90, // Percentage
+    },
+    {
+      icon: <FaReact />,
+      title: "React.js",
+      description:
+        "Experienced in developing responsive and interactive user interfaces using React.js, with expertise in hooks, context API, and state management.",
+      proficiency: 85,
+    },
+    {
+      icon: <FaNodeJs />,
+      title: "Node.js & Express",
+      description:
+        "Building robust server-side applications and RESTful APIs using Node.js and Express framework for efficient back-end development.",
+      proficiency: 80,
+    },
+    {
+      icon: <FaDatabase />,
+      title: "MongoDB & MySQL",
+      description:
+        "Working with both SQL and NoSQL databases to design efficient data models and implement database operations for web applications.",
+      proficiency: 75,
+    },
+    {
+      icon: <FaPython />,
+      title: "Python",
+      description:
+        "Proficient in Python programming for web development with Flask, along with experience in data processing and automation scripts.",
+      proficiency: 70,
+    },
+    {
+      icon: <FaCss3Alt />,
+      title: "Tailwind CSS",
+      description:
+        "Creating responsive and modern user interfaces with Tailwind CSS and DaisyUI for efficient and consistent styling across applications.",
+      proficiency: 85,
+    },
+    {
+      icon: <FaCodeBranch />,
+      title: "Git & Version Control",
+      description:
+        "Experienced in Git workflow, collaborating with teams using version control best practices for efficient code management.",
+      proficiency: 90,
+    },
+    {
+      icon: <FaFire />,
+      title: "Firebase",
+      description:
+        "Implementing authentication, real-time databases, and cloud functions using Firebase for seamless user experiences.",
+      proficiency: 75,
+    },
+    {
+      icon: <SiRedux />,
+      title: "Redux",
+      description:
+        "State management using Redux to efficiently handle global state and improve application performance.",
+      proficiency: 75,
+    },
+    {
+      icon: <RiNextjsLine />,
+      title: "Next.js",
+      description:
+        "Building fast and scalable web applications with Next.js, leveraging server-side rendering and static site generation.",
+      proficiency: 75,
+    },
+  ];
