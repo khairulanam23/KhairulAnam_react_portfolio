@@ -11,7 +11,7 @@ export default {
 
         'sm': '640px', // Small screens
   
-        'md': '768px', // Medium screens
+        'md': '1024px', // Medium screens
   
         'lg': '1440px', // Large screens
   

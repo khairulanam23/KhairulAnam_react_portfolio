@@ -113,7 +113,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-2 lg:space-x-4">
+          <div className="hidden lg:flex md:items-center md:space-x-2 lg:space-x-4">
             {navLinks.map((link, index) => (
               <NavLink
                 key={link.name}
@@ -192,7 +192,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile menu button and theme toggle */}
-          <div className="md:hidden flex items-center space-x-2">
+          <div className="lg:hidden flex items-center space-x-2">
             {/* Theme Toggle Mobile */}
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
