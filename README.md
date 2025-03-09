@@ -1,5 +1,3 @@
-Here’s a basic `README.md` template you can use for your portfolio repository:
-
 ```markdown
 # Khairul Anam React Portfolio
 
