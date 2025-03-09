@@ -156,7 +156,7 @@ const AboutAndExperience = () => {
                     onClick={() => {
                       const link = document.createElement("a");
                       link.href =
-                        "https://drive.google.com/file/d/1AewVXgJljlpH8V5W66kFpDL3cQb613yq/view?usp=sharing";
+                        "https://drive.google.com/file/d/1CdqAMUKVus0g03cOEc1oDXLiCA0yf-Xo/view?usp=sharing";
                       link.download = "Resume.pdf";
                       document.body.appendChild(link);
                       link.click();
