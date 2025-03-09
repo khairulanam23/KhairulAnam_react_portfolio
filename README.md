@@ -1,4 +1,3 @@
-```markdown
 # Khairul Anam React Portfolio
 
 Welcome to my personal portfolio built with React. This portfolio showcases some of my projects, skills, and experience in web development. It demonstrates my ability to build responsive, dynamic, and visually appealing websites using modern web technologies.
