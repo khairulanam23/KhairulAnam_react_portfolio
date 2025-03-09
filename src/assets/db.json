@@ -1,0 +1,90 @@
+{
+  "projects": [
+    {
+      "name": "Explore Ease",
+      "description": "A comprehensive tour guide system built with MongoDB, Express, React, and Node.js. Features user authentication via Firebase, responsive UI with Tailwind CSS and DaisyUI.",
+      "technologies": [
+        "MERN Stack",
+        "Tailwind CSS",
+        "Firebase"
+      ],
+      "links": {
+        "github": "https://github.com/khairulanam23/destination-dairy",
+        "live_demo": "#"
+      },
+      "image": "https://i.ibb.co.com/Q3vgC6Wr/travelguide.png"
+    },
+    {
+      "name": "BookBuz",
+      "description": "A React-based multi-page application for book listing and management using react-router-dom for seamless navigation and a responsive interface for book browsing.",
+      "technologies": [
+        "React",
+        "Router",
+        "Tailwind CSS"
+      ],
+      "links": {
+        "github": "https://github.com/khairulanam23/bookbuz",
+        "live_demo": "#"
+      },
+      "image": "https://i.ibb.co.com/67KwzHk2/bookbuzz.png"
+    },
+    {
+      "name": "MANZiL",
+      "description": "A React-based multi-page application for book listing and management using react-router-dom for seamless navigation and a responsive interface for book browsing. This project has private routes and user authentication, and it is built with React, React Router, and Tailwind CSS, it has filters and search functionality.",
+      "technologies": [
+        "React",
+        "Router",
+        "Tailwind CSS",
+        "Firebase"
+      ],
+      "links": {
+        "github": "https://app.netlify.com/sites/manzilkhairulanam/overview",
+        "live_demo": "#"
+      },
+      "image": "https://i.ibb.co.com/jN6hz2s/manzil.png"
+    },
+    {
+      "name": "P-Ticket",
+      "description": "A web application for bus ticket booking with a user-friendly interface. Features interactive seat selection, booking confirmation, and responsive design for all devices.",
+      "technologies": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "Tailwind"
+      ],
+      "links": {
+        "github": "https://github.com/khairulanam23/p-ticket",
+        "live_demo": "#"
+      },
+      "image": "/api/placeholder/500/300"
+    },
+    {
+      "name": "Pet Management Application",
+      "description": "A web application built with Flask and JavaScript for efficient pet care management. Features pet profile creation, care routines, and medication tracking.",
+      "technologies": [
+        "Flask",
+        "JavaScript",
+        "SQLite"
+      ],
+      "links": {
+        "github": "https://github.com/khairulanam23/pet-management",
+        "live_demo": "#"
+      },
+      "image": "/https://img.freepik.com/free-vector/pet-hospital-concept-illustration_114360-25803.jpg?t=st=1741516967~exp=1741520567~hmac=f5b0a040415add3b891bc6327a8b62083e872d752cb697fac595ad38ebb13e7e&w=740"
+    },
+    {
+      "name": "Tetris PyOpenGL Project",
+      "description": "A recreation of the classic Tetris game using Python and OpenGL, showcasing proficiency in game development, graphics programming, and interactive design.",
+      "technologies": [
+        "Python",
+        "OpenGL",
+        "Game Development"
+      ],
+      "links": {
+        "github": "https://github.com/khairulanam23/tetris-pyopengl",
+        "live_demo": "#"
+      },
+      "image": "/api/placeholder/500/300"
+    }
+  ]
+}

@@ -153,14 +153,22 @@ const AboutAndExperience = () => {
                   transition={{ delay: 1.3 }}
                 >
                   <a
-                    href="#"
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href =
+                        "https://drive.google.com/file/d/1AewVXgJljlpH8V5W66kFpDL3cQb613yq/view?usp=sharing";
+                      link.download = "Resume.pdf";
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
                     className="px-6 py-3 bg-gradient-to-r from-[var(--primary-color)] to-[var(--primary-dark)] rounded-full text-white font-semibold flex items-center gap-2 hover:from-[var(--primary-dark)] hover:to-[var(--primary-dark)] transform hover:-translate-y-1 transition-all duration-300 shadow-lg"
                   >
                     <FaDownload className="text-lg" />
                     Download CV
                   </a>
                   <a
-                    href="#"
+                    href="https://www.github.com/khairulanam23" target="_blank"
                     className="px-6 py-3 border-2 border-[var(--primary-color)] text-[var(--primary-color)] rounded-full font-semibold flex items-center gap-2 hover:bg-[var(--primary-color)] hover:text-white transform hover:-translate-y-1 transition-all duration-300"
                   >
                     <FaGithub className="text-lg" />
@@ -180,7 +188,7 @@ const AboutAndExperience = () => {
                   </div>
                   <div className="bg-[color-mix(in_srgb,var(--bg-color),#000000_10%)] p-3 rounded-lg text-center hover:bg-[var(--primary-color)] hover:bg-opacity-20 transition-all duration-300">
                     <p className="text-sm opacity-70">Projects</p>
-                    <p className="text-xl font-bold">10+</p>
+                    <p className="text-xl font-bold">5+</p>
                   </div>
                   <div className="bg-[color-mix(in_srgb,var(--bg-color),#000000_10%)] p-3 rounded-lg text-center hover:bg-[var(--primary-color)] hover:bg-opacity-20 transition-all duration-300">
                     <p className="text-sm opacity-70">Clients</p>
