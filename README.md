@@ -34,4 +34,3 @@ This project is open-source and available under the [MIT License](LICENSE).
 - **Email**: [mka.rifat.24@gmail.com]
 - **GitHub**: [https://github.com/khairulanam23](https://github.com/khairulanam23)
 - **LinkedIn**: [https://www.linkedin.com/in/khairulanam23](https://www.linkedin.com/in/khairulanam)
-```
