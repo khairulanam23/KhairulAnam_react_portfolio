@@ -140,7 +140,7 @@ const Home = ({ isDarkMode }) => {
                 : "var(--primary-dark)",
             }}
           >
-            Full Stack Developer
+            Web Developer
           </motion.h2>
 
           <motion.p
