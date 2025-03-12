@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FaJs,
   FaReact,
@@ -22,7 +22,7 @@ const SkillsCarousel = ({ isDarkMode }) => {
       title: "JavaScript & TypeScript",
       description:
         "Proficient in modern JavaScript and TypeScript, building interactive and dynamic web applications with strong type safety and scalable architecture.",
-      proficiency: 90, // Percentage
+      proficiency: 90,
     },
     {
       icon: <FaReact />,
@@ -90,460 +90,309 @@ const SkillsCarousel = ({ isDarkMode }) => {
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [radialsLoaded, setRadialsLoaded] = useState(false);
+  const [screenSize, setScreenSize] = useState("lg");
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [direction, setDirection] = useState(1); // 1 for next, -1 for prev
+  const [isPaused, setIsPaused] = useState(false);
   const autoPlayRef = useRef(null);
+  const containerRef = useRef(null);
+  const timeoutRef = useRef(null);
 
-  // Check if device is mobile
+  // Define skill categories
+  const skillCategories = {
+    Frontend: [
+      "JavaScript & TypeScript",
+      "React.js",
+      "Tailwind CSS",
+      "Redux",
+      "Next.js",
+    ],
+    Backend: ["Node.js & Express", "MongoDB & MySQL", "Firebase", "Python"],
+    Tools: ["Git & Version Control"],
+    Languages: ["JavaScript & TypeScript", "Python"],
+  };
+
+  // Filter skills based on the active filter
+  const filteredSkills =
+    activeFilter === "All"
+      ? skills
+      : skills.filter((skill) =>
+          skillCategories[activeFilter].includes(skill.title)
+        );
+
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setScreenSize("sm");
+      } else if (width < 1024) {
+        setScreenSize("md");
+      } else {
+        setScreenSize("lg");
+      }
     };
 
-    // Initial check
-    checkMobile();
-
-    // Add listener for resize
-    window.addEventListener("resize", checkMobile);
-
-    // Cleanup
-    return () => window.removeEventListener("resize", checkMobile);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Set radials as loaded after initial render
-  useEffect(() => {
-    // Small delay to ensure animation runs at least once
-    const timer = setTimeout(() => {
-      setRadialsLoaded(true);
-    }, 1500);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Automatically advance slides every 3.5 seconds
   useEffect(() => {
     const play = () => {
-      nextSlide();
+      if (!isPaused) {
+        nextSlide();
+      }
     };
-
     autoPlayRef.current = play;
-  }, [currentIndex]);
+  }, [currentIndex, isPaused, filteredSkills.length]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      if (autoPlayRef.current) {
+      if (autoPlayRef.current && !isAnimating) {
         autoPlayRef.current();
       }
-    }, 1500);
+    }, 5000);
 
     return () => clearInterval(interval);
+  }, [isAnimating]);
+
+  // Reset currentIndex when filter changes
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [activeFilter]);
+
+  // Clean up any pending timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
   }, []);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % skills.length);
+    if (isAnimating || filteredSkills.length <= 1) return;
+
+    setDirection(1);
+    setIsAnimating(true);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % filteredSkills.length);
+
+    // Delay to allow animation to complete
+    timeoutRef.current = setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
   };
 
   const prevSlide = () => {
+    if (isAnimating || filteredSkills.length <= 1) return;
+
+    setDirection(-1);
+    setIsAnimating(true);
     setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + skills.length) % skills.length
+      (prevIndex) =>
+        (prevIndex - 1 + filteredSkills.length) % filteredSkills.length
     );
+
+    // Delay to allow animation to complete
+    timeoutRef.current = setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
   };
 
-  // Get the icon background style
-  const getIconStyle = () => {
-    return {
-      backgroundColor: isDarkMode
-        ? "rgba(168, 85, 247, 0.2)"
-        : "rgba(34, 197, 94, 0.1)",
-      color: isDarkMode ? "var(--primary-color)" : "var(--primary-color)",
-    };
+  const handleFilterChange = (filter) => {
+    if (filter === activeFilter) return;
+    setIsAnimating(true);
+    setActiveFilter(filter);
+
+    // Delay to allow animation to complete
+    timeoutRef.current = setTimeout(() => {
+      setIsAnimating(false);
+    }, 500);
   };
 
-  // Navigation button style
-  const getNavButtonStyle = () => {
-    return {
-      backgroundColor: isDarkMode
-        ? "var(--primary-dark)"
-        : "var(--primary-dark)",
-      color: "white",
-    };
+  const getVisibleCount = () => {
+    if (screenSize === "sm") return 1;
+    if (screenSize === "md") return 2;
+    return 3;
   };
 
-  // Radial progress bar component with persistent animation state
-  const RadialProgress = ({ percentage, size = 70, strokeWidth = 6 }) => {
-    const radius = (size - strokeWidth) / 2;
-    const circumference = radius * 2 * Math.PI;
-    const dash = (percentage * circumference) / 100;
+  const getVisibleSkills = () => {
+    const count = getVisibleCount();
+    const result = [];
 
-    const primaryColor = isDarkMode
-      ? "var(--primary-color)"
-      : "var(--primary-color)";
-    const trackColor = isDarkMode
-      ? "rgba(168, 85, 247, 0.2)"
-      : "rgba(34, 197, 94, 0.1)";
-
-    return (
-      <div className="relative" style={{ width: size, height: size }}>
-        <svg
-          width={size}
-          height={size}
-          viewBox={`0 0 ${size} ${size}`}
-          className="relative rotate-90"
-        >
-          {/* Background track */}
-          <circle
-            className="transition-all duration-300"
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            strokeWidth={strokeWidth}
-            stroke={trackColor}
-            fill="transparent"
-          />
-
-          {/* Progress arc - Only animate if radials haven't been loaded yet */}
-          <motion.circle
-            initial={{
-              strokeDashoffset: radialsLoaded
-                ? circumference - dash
-                : circumference,
-            }}
-            animate={{ strokeDashoffset: circumference - dash }}
-            transition={{
-              duration: radialsLoaded ? 0 : 1.5,
-              delay: radialsLoaded ? 0 : 0.2,
-              ease: "easeOut",
-            }}
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            strokeWidth={strokeWidth}
-            stroke={primaryColor}
-            fill="transparent"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-          />
-        </svg>
-
-        {/* Percentage text with glow effect */}
-        <div
-          className="absolute top-0 left-0 w-full h-full flex items-center justify-center rotate-0"
-          style={{ fontSize: size * 0.25 }}
-        >
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: radialsLoaded ? 0 : 1 }}
-            className="font-semibold"
-            style={{
-              color: isDarkMode ? "white" : "black",
-              textShadow: isDarkMode
-                ? `0 0 10px ${primaryColor}40`
-                : `0 0 5px ${primaryColor}20`,
-            }}
-          >
-            {percentage}%
-          </motion.span>
-        </div>
-      </div>
-    );
-  };
-
-  // Get visible indices for the carousel
-  const getVisibleIndices = () => {
-    if (isMobile) {
-      // For mobile, only show current item
-      return [currentIndex];
+    for (let i = 0; i < count; i++) {
+      const index = (currentIndex + i) % filteredSkills.length;
+      result.push({
+        ...filteredSkills[index],
+        index,
+      });
     }
 
-    // For desktop, show 5 items
-    return [
-      (currentIndex - 2 + skills.length) % skills.length,
-      (currentIndex - 1 + skills.length) % skills.length,
-      currentIndex,
-      (currentIndex + 1) % skills.length,
-      (currentIndex + 2) % skills.length,
-    ];
+    return result;
   };
 
-  // Render mobile view
-  const renderMobileView = () => {
-    const skill = skills[currentIndex];
+  const visibleSkills = getVisibleSkills();
 
-    return (
+  // Water-themed colors
+  const accentColor = isDarkMode ? "#1E90FF" : "#39B7FF";
+  const bgColor = isDarkMode ? "#0A1929" : "#E8F7FF";
+  const textColor = isDarkMode ? "#E8F7FF" : "#0F4C75";
+  const secondaryTextColor = isDarkMode ? "#A7D8FF" : "#3A7CA5";
+  const cardBgColor = isDarkMode ? "#0D2137" : "#FFFFFF";
+
+  // Animation variants for the card
+  const cardVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.8,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5,
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+      },
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.8,
+      transition: {
+        duration: 0.4,
+      },
+    }),
+  };
+
+  // Water-themed progress bar component with wave effect
+  const ProgressBar = ({ value }) => (
+    <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden relative">
       <motion.div
-        key={currentIndex}
-        className="rounded-lg p-6 shadow-lg border w-full max-w-sm mx-auto"
+        className="h-full rounded-full relative overflow-hidden"
         style={{
-          backgroundColor: isDarkMode ? "var(--bg-color)" : "white",
-          borderColor: isDarkMode
-            ? "rgba(126, 34, 206, 0.3)"
-            : "rgba(21, 128, 61, 0.1)",
-          color: isDarkMode ? "var(--text-color)" : "var(--text-color)",
-          boxShadow: isDarkMode
-            ? "0 10px 25px -5px rgba(126, 34, 206, 0.5)"
-            : "0 10px 25px -5px rgba(21, 128, 61, 0.25)",
+          width: `${value}%`,
+          background: `linear-gradient(90deg, ${accentColor} 0%, ${
+            isDarkMode ? "#39B7FF" : "#74D0FF"
+          } 100%)`,
         }}
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
-        }}
+        initial={{ width: 0 }}
+        animate={{ width: `${value}%` }}
+        transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
       >
-        <div className="flex flex-col items-center mb-4">
-          <motion.div
-            className="text-4xl mb-4 inline-flex items-center justify-center p-4 rounded-full"
-            style={getIconStyle()}
-            initial={{ scale: 0.8, rotate: -10 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            {skill.icon}
-          </motion.div>
-
-          <h3
-            style={{
-              color: isDarkMode
-                ? "var(--primary-light)"
-                : "var(--primary-dark)",
-            }}
-            className="text-2xl font-semibold mb-4 text-center"
-          >
-            {skill.title}
-          </h3>
-        </div>
-
-        {/* Radial progress indicator */}
-        <div className="flex justify-center my-5">
-          <RadialProgress
-            percentage={skill.proficiency}
-            size={100}
-            strokeWidth={8}
-          />
-        </div>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
+        {/* Add subtle wave effect */}
+        <div
+          className="absolute inset-0 opacity-30"
           style={{
-            color: isDarkMode ? "var(--font-color)" : "var(--font-color)",
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='wave' width='100' height='8' patternUnits='userSpaceOnUse'%3E%3Cpath d='M0 4 Q 12.5 0, 25 4 T 50 4 T 75 4 T 100 4 V 8 H 0 Z' fill='%23FFFFFF' opacity='0.2'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23wave)'/%3E%3C/svg%3E")`,
+            backgroundSize: "100px 8px",
+            animation: "wave 2s linear infinite",
           }}
-          className="text-justify mt-3"
-        >
-          {skill.description}
-        </motion.p>
-
-        {/* Visual enhancement: Skill level indicator */}
-        <div className="mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium">
-              {skill.proficiency < 75
-                ? "Intermediate"
-                : skill.proficiency < 85
-                ? "Advanced"
-                : "Expert"}
-            </span>
-            <motion.div
-              className="flex space-x-1"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-            >
-              {[1, 2, 3, 4, 5].map((star) => (
-                <div
-                  key={star}
-                  className="w-3 h-3 rounded-full"
-                  style={{
-                    backgroundColor:
-                      star <= Math.ceil(skill.proficiency / 20)
-                        ? isDarkMode
-                          ? "var(--primary-color)"
-                          : "var(--primary-color)"
-                        : isDarkMode
-                        ? "rgba(168, 85, 247, 0.2)"
-                        : "rgba(34, 197, 94, 0.2)",
-                  }}
-                />
-              ))}
-            </motion.div>
-          </div>
-        </div>
+        />
       </motion.div>
-    );
+    </div>
+  );
+
+  // Animation for filter buttons
+  const filterButtonVariants = {
+    hover: {
+      scale: 1.05,
+      backgroundColor: isDarkMode
+        ? "rgba(30, 144, 255, 0.2)"
+        : "rgba(57, 183, 255, 0.2)",
+      transition: {
+        duration: 0.2,
+      },
+    },
+    tap: {
+      scale: 0.95,
+      backgroundColor: isDarkMode
+        ? "rgba(30, 144, 255, 0.3)"
+        : "rgba(57, 183, 255, 0.3)",
+      transition: {
+        duration: 0.1,
+      },
+    },
+    active: {
+      backgroundColor: isDarkMode
+        ? "rgba(30, 144, 255, 0.4)"
+        : "rgba(57, 183, 255, 0.4)",
+      borderColor: accentColor,
+      color: accentColor,
+      transition: {
+        duration: 0.3,
+      },
+    },
   };
 
-  // Render desktop view
-  const renderDesktopView = () => {
+  // Navigation button animations
+  const navButtonVariants = {
+    hover: {
+      scale: 1.1,
+      backgroundColor: isDarkMode
+        ? "rgba(30, 144, 255, 0.2)"
+        : "rgba(57, 183, 255, 0.2)",
+      transition: {
+        duration: 0.2,
+      },
+    },
+    tap: {
+      scale: 0.9,
+      backgroundColor: isDarkMode
+        ? "rgba(30, 144, 255, 0.3)"
+        : "rgba(57, 183, 255, 0.3)",
+      transition: {
+        duration: 0.1,
+      },
+    },
+    disabled: {
+      opacity: 0.5,
+      cursor: "not-allowed",
+    },
+  };
+
+  // Category filter buttons
+  const renderFilterButtons = () => {
+    const filters = ["All", ...Object.keys(skillCategories)];
     return (
-      <div className="relative px-10">
-        {/* Carousel container */}
-        <div className="overflow-hidden mx-auto" style={{ height: "400px" }}>
-          <div className="flex justify-center items-center h-full relative">
-            {getVisibleIndices().map((index, positionIndex) => {
-              const skill = skills[index];
-              // Position from -2 to +2 relative to center
-              const position = positionIndex - 2;
-
-              // Calculate styles based on position from center
-              const xPos = position * 310; // Card width + gap
-              const scale = 1 - 0.1 * Math.abs(position);
-              const opacity = 1 - 0.25 * Math.abs(position);
-              const zIndex = 10 - Math.abs(position);
-
-              return (
-                <motion.div
-                  key={index}
-                  className="absolute rounded-lg p-6 shadow-lg border w-full max-w-sm"
-                  style={{
-                    backgroundColor: isDarkMode ? "var(--bg-color)" : "white",
-                    borderColor: isDarkMode
-                      ? "rgba(126, 34, 206, 0.3)"
-                      : "rgba(21, 128, 61, 0.1)",
-                    color: isDarkMode
-                      ? "var(--text-color)"
-                      : "var(--text-color)",
-                    boxShadow:
-                      position === 0
-                        ? isDarkMode
-                          ? "0 10px 25px -5px rgba(126, 34, 206, 0.5)"
-                          : "0 10px 25px -5px rgba(21, 128, 61, 0.25)"
-                        : "none",
-                    zIndex,
-                  }}
-                  initial={{
-                    x: position > 0 ? 1000 : -1000,
-                    opacity: 0,
-                    scale: 0.8,
-                  }}
-                  animate={{
-                    x: xPos,
-                    opacity,
-                    scale,
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 30,
-                    duration: 0.5,
-                  }}
-                >
-                  <div className="flex flex-col items-center mb-4">
-                    <motion.div
-                      className="text-3xl mb-4 inline-flex items-center justify-center p-3 rounded-full"
-                      style={getIconStyle()}
-                      whileHover={{
-                        scale: 1.1,
-                        rotate: position === 0 ? 5 : 0,
-                      }}
-                    >
-                      {skill.icon}
-                    </motion.div>
-
-                    <h3
-                      style={{
-                        color: isDarkMode
-                          ? "var(--primary-light)"
-                          : "var(--primary-dark)",
-                      }}
-                      className="text-xl font-semibold mb-3 text-center"
-                    >
-                      {skill.title}
-                    </h3>
-                  </div>
-
-                  {/* Radial progress indicator */}
-                  <div className="flex justify-center my-4">
-                    <RadialProgress percentage={skill.proficiency} />
-                  </div>
-
-                  <p
-                    style={{
-                      color: isDarkMode
-                        ? "var(--font-color)"
-                        : "var(--font-color)",
-                    }}
-                    className="text-justify mt-3"
-                  >
-                    {skill.description}
-                  </p>
-
-                  {/* Visual enhancement: Skill level indicator (only visible for center card) */}
-                  {position === 0 && (
-                    <motion.div
-                      className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-700"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs font-medium">
-                          {skill.proficiency < 75
-                            ? "Intermediate"
-                            : skill.proficiency < 85
-                            ? "Advanced"
-                            : "Expert"}
-                        </span>
-                        <div className="flex space-x-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <div
-                              key={star}
-                              className="w-2 h-2 rounded-full"
-                              style={{
-                                backgroundColor:
-                                  star <= Math.ceil(skill.proficiency / 20)
-                                    ? isDarkMode
-                                      ? "var(--primary-color)"
-                                      : "var(--primary-color)"
-                                    : isDarkMode
-                                    ? "rgba(168, 85, 247, 0.2)"
-                                    : "rgba(34, 197, 94, 0.2)",
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Navigation buttons */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center shadow-lg z-20 transition-all hover:scale-110"
-          style={getNavButtonStyle()}
-          aria-label="Previous slide"
-        >
-          <FaChevronLeft className="text-lg" />
-        </button>
-
-        <button
-          onClick={nextSlide}
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center shadow-lg z-20 transition-all hover:scale-110"
-          style={getNavButtonStyle()}
-          aria-label="Next slide"
-        >
-          <FaChevronRight className="text-lg" />
-        </button>
+      <div className="flex flex-wrap justify-center gap-2 mb-6">
+        {filters.map((filter) => (
+          <motion.button
+            key={filter}
+            className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+              activeFilter === filter
+                ? `border-${accentColor.replace(
+                    "#",
+                    ""
+                  )} text-${accentColor.replace("#", "")}`
+                : "border-gray-300 dark:border-gray-700"
+            }`}
+            onClick={() => handleFilterChange(filter)}
+            variants={filterButtonVariants}
+            whileHover="hover"
+            whileTap="tap"
+            animate={activeFilter === filter ? "active" : {}}
+            disabled={isAnimating}
+            style={{
+              borderColor: activeFilter === filter ? accentColor : "",
+              color: activeFilter === filter ? accentColor : textColor,
+            }}
+          >
+            {filter}
+          </motion.button>
+        ))}
       </div>
     );
   };
 
   return (
     <section
-      style={{
-        backgroundColor: isDarkMode ? "var(--bg-color)" : "var(--bg-color)",
-        color: isDarkMode ? "var(--text-color)" : "var(--text-color)",
-        transition: "background-color 0.5s ease, color 0.5s ease",
-      }}
       className="py-16 px-4"
+      style={{ backgroundColor: bgColor, color: textColor }}
     >
       <div className="max-w-7xl mx-auto">
         <motion.div
@@ -553,80 +402,561 @@ const SkillsCarousel = ({ isDarkMode }) => {
           className="text-center mb-12"
         >
           <h2
-            style={{
-              color: isDarkMode
-                ? "var(--primary-color)"
-                : "var(--primary-color)",
-            }}
             className="text-4xl font-bold mb-3"
+            style={{ color: accentColor }}
           >
             My Skills
           </h2>
-          <p
-            style={{
-              color: isDarkMode ? "var(--text-color)" : "var(--text-color)",
-            }}
-            className="text-xl"
-          >
-            What I bring to the table
-          </p>
-          <div
-            style={{
-              backgroundColor: isDarkMode
-                ? "var(--primary-color)"
-                : "var(--primary-color)",
-            }}
-            className="w-24 h-1 mx-auto mt-4 rounded"
-          ></div>
+          <p className="text-xl mb-4">What I bring to the table</p>
+
+          {/* Water droplet divider */}
+          <div className="flex justify-center items-center mb-6">
+            <div
+              className="w-16 h-1 mx-2 rounded-full"
+              style={{ backgroundColor: `${accentColor}40` }}
+            ></div>
+            <div className="relative">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill={accentColor}
+              >
+                <path d="M12,1.85L10.15,3.7C7.8,6.05 4,12.35 4,16C4,20.4 7.6,24 12,24C16.4,24 20,20.4 20,16C20,12.35 16.2,6.05 13.85,3.7L12,1.85M12,5.35C13.95,7.3 18,13.15 18,16C18,19.3 15.3,22 12,22C8.7,22 6,19.3 6,16C6,13.15 10.05,7.3 12,5.35Z" />
+              </svg>
+              <div
+                className="absolute inset-0 animate-pulse"
+                style={{
+                  background: `radial-gradient(circle, ${accentColor}40 0%, transparent 70%)`,
+                }}
+              ></div>
+            </div>
+            <div
+              className="w-16 h-1 mx-2 rounded-full"
+              style={{ backgroundColor: `${accentColor}40` }}
+            ></div>
+          </div>
         </motion.div>
 
-        {/* Mobile view (single card) */}
-        {isMobile ? renderMobileView() : renderDesktopView()}
-
-        {/* Indicator dots */}
-        <div className="flex justify-center mt-8">
-          {skills.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                setCurrentIndex(index);
-              }}
-              style={{
-                backgroundColor:
-                  currentIndex === index
-                    ? isDarkMode
-                      ? "var(--primary-color)"
-                      : "var(--primary-color)"
-                    : isDarkMode
-                    ? "rgba(168, 85, 247, 0.3)"
-                    : "rgba(34, 197, 94, 0.3)",
-              }}
-              className="w-3 h-3 rounded-full mx-1 transition-colors duration-300"
-              aria-label={`Go to slide ${index + 1}`}
-            >
-              {/* Adding a pulse effect to the current dot */}
-              {currentIndex === index && (
-                <motion.div
-                  className="absolute w-3 h-3 rounded-full"
-                  style={{
-                    backgroundColor: isDarkMode
-                      ? "var(--primary-color)"
-                      : "var(--primary-color)",
-                  }}
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [1, 0.5, 1],
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 2,
-                  }}
-                />
-              )}
-            </button>
-          ))}
+        {/* Skill Filter Options - water-themed */}
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          {["All", "Frontend", "Backend", "Tools", "Languages"].map(
+            (filter) => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className="px-4 py-2 rounded-full text-sm font-medium transition-all"
+                style={{
+                  backgroundColor:
+                    filter === activeFilter
+                      ? accentColor
+                      : isDarkMode
+                      ? "rgba(30, 144, 255, 0.1)"
+                      : "rgba(57, 183, 255, 0.1)",
+                  color: filter === activeFilter ? "#fff" : accentColor,
+                  boxShadow:
+                    filter === activeFilter
+                      ? `0 0 10px ${accentColor}40`
+                      : "none",
+                }}
+              >
+                {filter}
+              </button>
+            )
+          )}
         </div>
+
+        {/* Skills cards container */}
+        <div className="relative" ref={containerRef}>
+          <div className="overflow-hidden py-4">
+            <div className="flex gap-6 mx-auto justify-center flex-wrap">
+              <AnimatePresence mode="wait">
+                {visibleSkills.map((skill, idx) => (
+                  <motion.div
+                    key={skill.index}
+                    className="w-full sm:w-64 md:w-80 lg:w-96 rounded-xl overflow-hidden shadow-lg"
+                    style={{
+                      backgroundColor: cardBgColor,
+                      border: `1px solid ${
+                        isDarkMode
+                          ? "rgba(57, 183, 255, 0.2)"
+                          : "rgba(57, 183, 255, 0.1)"
+                      }`,
+                      boxShadow: `0 10px 25px -5px ${accentColor}20`,
+                    }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{
+                      duration: 0.4,
+                      delay: idx * 0.1,
+                      ease: "easeOut",
+                    }}
+                  >
+                    {/* Card header with wave pattern background */}
+                    <div
+                      className="relative p-4 overflow-hidden"
+                      style={{
+                        background: `linear-gradient(180deg, ${accentColor}20 0%, ${accentColor}05 100%)`,
+                      }}
+                    >
+                      {/* Subtle wave background */}
+                      <div
+                        className="absolute inset-0 opacity-20"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='100%25' height='40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20 Q 20 5, 40 20 T 80 20 T 120 20 T 160 20 T 200 20' stroke='${accentColor.replace(
+                            "#",
+                            "%23"
+                          )}' fill='none' stroke-width='2'/%3E%3C/svg%3E")`,
+                          backgroundSize: "200px 40px",
+                          backgroundPosition: "center",
+                        }}
+                      />
+
+                      <div className="flex justify-between items-center relative z-10">
+                        <div
+                          className="w-16 h-16 flex items-center justify-center rounded-full text-2xl"
+                          style={{
+                            backgroundColor: isDarkMode ? "#0F2942" : "#FFFFFF",
+                            color: accentColor,
+                            boxShadow: `0 4px 15px -2px ${accentColor}40`,
+                          }}
+                        >
+                          {skill.icon}
+                        </div>
+                        <div
+                          className="text-sm font-semibold px-3 py-1 rounded-full"
+                          style={{
+                            backgroundColor: accentColor,
+                            color: "#FFFFFF",
+                          }}
+                        >
+                          {skill.proficiency}% proficiency
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card content */}
+                    <div className="p-6">
+                      <h3
+                        className="text-xl font-bold mb-2"
+                        style={{ color: isDarkMode ? accentColor : "#0F4C75" }}
+                      >
+                        {skill.title}
+                      </h3>
+                      <p
+                        className="mb-4 text-sm"
+                        style={{ color: secondaryTextColor }}
+                      >
+                        {skill.description}
+                      </p>
+
+                      {/* Proficiency bar */}
+                      <div className="mt-4">
+                        <div className="flex justify-between items-center mb-1">
+                          <span
+                            className="text-xs font-medium"
+                            style={{ color: secondaryTextColor }}
+                          >
+                            Proficiency
+                          </span>
+                          <span
+                            className="text-xs font-medium"
+                            style={{ color: accentColor }}
+                          >
+                            {skill.proficiency}%
+                          </span>
+                        </div>
+                        <ProgressBar value={skill.proficiency} />
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Navigation arrows */}
+          {filteredSkills.length > getVisibleCount() && (
+            <div className="flex justify-center mt-8 gap-4">
+              <button
+                onClick={prevSlide}
+                className="p-2 rounded-full transition-all duration-300 transform hover:scale-110"
+                style={{
+                  backgroundColor: isDarkMode
+                    ? "rgba(30, 144, 255, 0.1)"
+                    : "rgba(57, 183, 255, 0.1)",
+                  color: accentColor,
+                }}
+                aria-label="Previous slide"
+              >
+                <FaChevronLeft size={24} />
+              </button>
+              <button
+                onClick={nextSlide}
+                className="p-2 rounded-full transition-all duration-300 transform hover:scale-110"
+                style={{
+                  backgroundColor: isDarkMode
+                    ? "rgba(30, 144, 255, 0.1)"
+                    : "rgba(57, 183, 255, 0.1)",
+                  color: accentColor,
+                }}
+                aria-label="Next slide"
+              >
+                <FaChevronRight size={24} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Skills overview section */}
+        <div className="mt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-center mb-10"
+          >
+            <h3
+              className="text-2xl font-bold mb-3"
+              style={{ color: accentColor }}
+            >
+              Skills Overview
+            </h3>
+            <div
+              className="w-24 h-1 mx-auto rounded-full"
+              style={{ backgroundColor: accentColor }}
+            ></div>
+          </motion.div>
+
+          {/* Skills overview categories with water-themed graphics */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Frontend */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="p-6 rounded-xl"
+              style={{
+                backgroundColor: isDarkMode ? "#0D2137" : "#FFFFFF",
+                boxShadow: `0 10px 25px -5px ${accentColor}20`,
+                border: `1px solid ${
+                  isDarkMode
+                    ? "rgba(57, 183, 255, 0.2)"
+                    : "rgba(57, 183, 255, 0.1)"
+                }`,
+              }}
+            >
+              <div className="relative h-20 w-20 mx-auto mb-4">
+                {/* Water drop with FE icon */}
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-full h-full"
+                  fill={accentColor}
+                >
+                  <path d="M12,1.85L10.15,3.7C7.8,6.05 4,12.35 4,16C4,20.4 7.6,24 12,24C16.4,24 20,20.4 20,16C20,12.35 16.2,6.05 13.85,3.7L12,1.85M12,5.35C13.95,7.3 18,13.15 18,16C18,19.3 15.3,22 12,22C8.7,22 6,19.3 6,16C6,13.15 10.05,7.3 12,5.35Z" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-white">
+                  <FaReact size={28} />
+                </div>
+              </div>
+              <h4
+                className="text-lg font-bold mb-3 text-center"
+                style={{ color: isDarkMode ? "#FFFFFF" : "#0F4C75" }}
+              >
+                Frontend Development
+              </h4>
+              <ul className="space-y-2">
+                {skillCategories.Frontend.map((skill) => (
+                  <li
+                    key={skill}
+                    className="flex items-center text-sm"
+                    style={{ color: secondaryTextColor }}
+                  >
+                    <div
+                      className="w-1.5 h-1.5 rounded-full mr-2"
+                      style={{ backgroundColor: accentColor }}
+                    ></div>
+                    {skill}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Backend */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="p-6 rounded-xl"
+              style={{
+                backgroundColor: isDarkMode ? "#0D2137" : "#FFFFFF",
+                boxShadow: `0 10px 25px -5px ${accentColor}20`,
+                border: `1px solid ${
+                  isDarkMode
+                    ? "rgba(57, 183, 255, 0.2)"
+                    : "rgba(57, 183, 255, 0.1)"
+                }`,
+              }}
+            >
+              <div className="relative h-20 w-20 mx-auto mb-4">
+                {/* Water drop with BE icon */}
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-full h-full"
+                  fill={accentColor}
+                >
+                  <path d="M12,1.85L10.15,3.7C7.8,6.05 4,12.35 4,16C4,20.4 7.6,24 12,24C16.4,24 20,20.4 20,16C20,12.35 16.2,6.05 13.85,3.7L12,1.85M12,5.35C13.95,7.3 18,13.15 18,16C18,19.3 15.3,22 12,22C8.7,22 6,19.3 6,16C6,13.15 10.05,7.3 12,5.35Z" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-white">
+                  <FaNodeJs size={28} />
+                </div>
+              </div>
+              <h4
+                className="text-lg font-bold mb-3 text-center"
+                style={{ color: isDarkMode ? "#FFFFFF" : "#0F4C75" }}
+              >
+                Backend Development
+              </h4>
+              <ul className="space-y-2">
+                {skillCategories.Backend.map((skill) => (
+                  <li
+                    key={skill}
+                    className="flex items-center text-sm"
+                    style={{ color: secondaryTextColor }}
+                  >
+                    <div
+                      className="w-1.5 h-1.5 rounded-full mr-2"
+                      style={{ backgroundColor: accentColor }}
+                    ></div>
+                    {skill}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Tools */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="p-6 rounded-xl"
+              style={{
+                backgroundColor: isDarkMode ? "#0D2137" : "#FFFFFF",
+                boxShadow: `0 10px 25px -5px ${accentColor}20`,
+                border: `1px solid ${
+                  isDarkMode
+                    ? "rgba(57, 183, 255, 0.2)"
+                    : "rgba(57, 183, 255, 0.1)"
+                }`,
+              }}
+            >
+              <div className="relative h-20 w-20 mx-auto mb-4">
+                {/* Water drop with tools icon */}
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-full h-full"
+                  fill={accentColor}
+                >
+                  <path d="M12,1.85L10.15,3.7C7.8,6.05 4,12.35 4,16C4,20.4 7.6,24 12,24C16.4,24 20,20.4 20,16C20,12.35 16.2,6.05 13.85,3.7L12,1.85M12,5.35C13.95,7.3 18,13.15 18,16C18,19.3 15.3,22 12,22C8.7,22 6,19.3 6,16C6,13.15 10.05,7.3 12,5.35Z" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-white">
+                  <FaCodeBranch size={28} />
+                </div>
+              </div>
+              <h4
+                className="text-lg font-bold mb-3 text-center"
+                style={{ color: isDarkMode ? "#FFFFFF" : "#0F4C75" }}
+              >
+                Development Tools
+              </h4>
+              <ul className="space-y-2">
+                {skillCategories.Tools.map((skill) => (
+                  <li
+                    key={skill}
+                    className="flex items-center text-sm"
+                    style={{ color: secondaryTextColor }}
+                  >
+                    <div
+                      className="w-1.5 h-1.5 rounded-full mr-2"
+                      style={{ backgroundColor: accentColor }}
+                    ></div>
+                    {skill}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Languages */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="p-6 rounded-xl"
+              style={{
+                backgroundColor: isDarkMode ? "#0D2137" : "#FFFFFF",
+                boxShadow: `0 10px 25px -5px ${accentColor}20`,
+                border: `1px solid ${
+                  isDarkMode
+                    ? "rgba(57, 183, 255, 0.2)"
+                    : "rgba(57, 183, 255, 0.1)"
+                }`,
+              }}
+            >
+              <div className="relative h-20 w-20 mx-auto mb-4">
+                {/* Water drop with language icon */}
+                <svg
+                  viewBox="0 0 24 24"
+                  className="w-full h-full"
+                  fill={accentColor}
+                >
+                  <path d="M12,1.85L10.15,3.7C7.8,6.05 4,12.35 4,16C4,20.4 7.6,24 12,24C16.4,24 20,20.4 20,16C20,12.35 16.2,6.05 13.85,3.7L12,1.85M12,5.35C13.95,7.3 18,13.15 18,16C18,19.3 15.3,22 12,22C8.7,22 6,19.3 6,16C6,13.15 10.05,7.3 12,5.35Z" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center text-white">
+                  <FaJs size={28} />
+                </div>
+              </div>
+              <h4
+                className="text-lg font-bold mb-3 text-center"
+                style={{ color: isDarkMode ? "#FFFFFF" : "#0F4C75" }}
+              >
+                Programming Languages
+              </h4>
+              <ul className="space-y-2">
+                {skillCategories.Languages.map((skill) => (
+                  <li
+                    key={skill}
+                    className="flex items-center text-sm"
+                    style={{ color: secondaryTextColor }}
+                  >
+                    <div
+                      className="w-1.5 h-1.5 rounded-full mr-2"
+                      style={{ backgroundColor: accentColor }}
+                    ></div>
+                    {skill}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Call to action */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mt-20 text-center"
+        >
+          <div
+            className="p-8 rounded-xl max-w-3xl mx-auto relative overflow-hidden"
+            style={{
+              backgroundColor: isDarkMode
+                ? "rgba(13, 33, 55, 0.8)"
+                : "rgba(255, 255, 255, 0.8)",
+              border: `1px solid ${
+                isDarkMode
+                  ? "rgba(57, 183, 255, 0.3)"
+                  : "rgba(57, 183, 255, 0.2)"
+              }`,
+              boxShadow: `0 15px 30px -10px ${accentColor}30`,
+            }}
+          >
+            {/* Decorative water wave background */}
+            <div
+              className="absolute inset-0 opacity-10 pointer-events-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='100%25' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 50 Q 25 30, 50 50 T 100 50 T 150 50 T 200 50 T 250 50 T 300 50 T 350 50' stroke='${accentColor.replace(
+                  "#",
+                  "%23"
+                )}' fill='none' stroke-width='2'/%3E%3C/svg%3E")`,
+                backgroundSize: "350px 50px",
+                backgroundPosition: "center",
+                animation: "wave-slide 20s linear infinite",
+              }}
+            />
+
+            <h3
+              className="text-2xl font-bold mb-4"
+              style={{ color: accentColor }}
+            >
+              Ready to Collaborate?
+            </h3>
+            <p
+              className="mb-6 max-w-xl mx-auto"
+              style={{ color: secondaryTextColor }}
+            >
+              I'm always open to discussing new projects, creative ideas or
+              opportunities to be part of your vision.
+            </p>
+            <button
+              className="px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105"
+              style={{
+                background: `linear-gradient(90deg, ${accentColor} 0%, ${
+                  isDarkMode ? "#39B7FF" : "#74D0FF"
+                } 100%)`,
+                color: "#FFFFFF",
+                boxShadow: `0 4px 15px -3px ${accentColor}50`,
+              }}
+            >
+              <span className="flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                Contact Me
+              </span>
+            </button>
+
+            {/* Floating water drops decoration */}
+            <div className="absolute -bottom-6 -right-6 w-24 h-24 opacity-20 pointer-events-none">
+              <svg
+                viewBox="0 0 24 24"
+                className="w-full h-full"
+                fill={accentColor}
+              >
+                <path d="M12,1.85L10.15,3.7C7.8,6.05 4,12.35 4,16C4,20.4 7.6,24 12,24C16.4,24 20,20.4 20,16C20,12.35 16.2,6.05 13.85,3.7L12,1.85M12,5.35C13.95,7.3 18,13.15 18,16C18,19.3 15.3,22 12,22C8.7,22 6,19.3 6,16C6,13.15 10.05,7.3 12,5.35Z" />
+              </svg>
+            </div>
+            <div className="absolute -bottom-3 -left-3 w-16 h-16 opacity-15 pointer-events-none">
+              <svg
+                viewBox="0 0 24 24"
+                className="w-full h-full"
+                fill={accentColor}
+              >
+                <path d="M12,1.85L10.15,3.7C7.8,6.05 4,12.35 4,16C4,20.4 7.6,24 12,24C16.4,24 20,20.4 20,16C20,12.35 16.2,6.05 13.85,3.7L12,1.85M12,5.35C13.95,7.3 18,13.15 18,16C18,19.3 15.3,22 12,22C8.7,22 6,19.3 6,16C6,13.15 10.05,7.3 12,5.35Z" />
+              </svg>
+            </div>
+          </div>
+        </motion.div>
       </div>
+
+      {/* Water-themed animation keyframes */}
+      <style jsx>{`
+        @keyframes wave {
+          0% {
+            background-position: 0 0;
+          }
+          100% {
+            background-position: 100px 0;
+          }
+        }
+
+        @keyframes wave-slide {
+          0% {
+            background-position: 0 0;
+          }
+          100% {
+            background-position: 1000px 0;
+          }
+        }
+      `}</style>
     </section>
   );
 };

@@ -3,17 +3,99 @@ import { motion } from "framer-motion";
 import { Send, Code } from "lucide-react";
 import { FaTrophy, FaGraduationCap, FaAward } from "react-icons/fa";
 
+const ThemedWaveAnimation = ({ isDarkMode }) => {
+  // Generate multiple wave paths with varying frequencies and amplitudes
+  const generateWavePath = (baseY, amplitude, frequency) => {
+    let path = `M0,${baseY} `;
+
+    for (let i = 0; i <= 1200; i += 20) {
+      const y = baseY + Math.sin(i * frequency) * amplitude;
+      path += `L${i},${y} `;
+    }
+
+    path += "L1200,120 L0,120 Z";
+    return path;
+  };
+
+  // Generate an array of wave configurations
+  const waves = Array.from({ length: 15 }, (_, i) => ({
+    baseY: 40 + i * 5,
+    amplitude: 5 + i * 0.8,
+    frequency: 0.01 + i * 0.002,
+    duration: 20 + i * 0.5,
+    delay: i * 0.2,
+    opacity: 0.05 + i * 0.02,
+  }));
+
+  // Get the primary color based on the theme
+  const getWaveColor = (index, totalWaves) => {
+    // For dark mode: gradient from primary-light to a slightly darker shade
+    // For light mode: gradient from primary-color to a slightly lighter shade
+    if (isDarkMode) {
+      return `var(--primary-light)`;
+    } else {
+      return `var(--primary-color)`;
+    }
+  };
+
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden pointer-events-none z-0"
+      style={{ backgroundColor: "var(--bg-color)" }} // Use theme background color
+    >
+      {waves.map((wave, index) => (
+        <motion.div
+          key={index}
+          className="absolute w-full h-full"
+          style={{
+            y: 0,
+            zIndex: -1,
+          }}
+        >
+          <svg
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            className="absolute bottom-0 w-full h-full"
+          >
+            <motion.path
+              d={generateWavePath(wave.baseY, wave.amplitude, wave.frequency)}
+              fill="transparent"
+              stroke={getWaveColor(index, waves.length)}
+              strokeWidth="1"
+              strokeOpacity={wave.opacity}
+              initial={{ x: "-5%" }}
+              animate={{
+                x: ["0%", "5%", "0%", "-5%", "0%"],
+              }}
+              transition={{
+                duration: wave.duration,
+                ease: "easeInOut",
+                repeat: Infinity,
+                repeatType: "loop",
+                delay: wave.delay,
+              }}
+            />
+          </svg>
+        </motion.div>
+      ))}
+    </div>
+  );
+};
+
 const Home = ({ isDarkMode }) => {
   return (
     <>
       <div
-        className="min-h-screen flex items-center"
+        className="min-h-screen flex items-center relative"
         style={{
           backgroundColor: "var(--bg-color)",
           color: "var(--text-color)",
+          overflow: "hidden",
         }}
       >
-        <div className="container mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
+        <ThemedWaveAnimation isDarkMode={isDarkMode} />
+
+        <div className="container mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center relative z-10">
           {/* Content Section */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -81,11 +163,11 @@ const Home = ({ isDarkMode }) => {
               <a
                 href="/projects"
                 className="font-bold inline-flex items-center justify-center gap-2 px-6 py-3 
-              rounded-lg 
-              shadow-lg
-              hover:shadow-xl
-              transition duration-300 
-              transform hover:-translate-y-1"
+                rounded-lg 
+                shadow-lg
+                hover:shadow-xl
+                transition duration-300 
+                transform hover:-translate-y-1"
                 style={{
                   backgroundColor: "var(--primary-color)",
                   color: "white",
@@ -97,11 +179,11 @@ const Home = ({ isDarkMode }) => {
               <a
                 href="/contact"
                 className="font-bold inline-flex items-center justify-center gap-2 px-6 py-3 
-              rounded-lg 
-              shadow-md
-              hover:shadow-lg
-              transition duration-300 
-              transform hover:-translate-y-1"
+                rounded-lg 
+                shadow-md
+                hover:shadow-lg
+                transition duration-300 
+                transform hover:-translate-y-1"
                 style={{
                   backgroundColor: isDarkMode
                     ? "rgba(168, 85, 247, 0.2)"
@@ -135,8 +217,8 @@ const Home = ({ isDarkMode }) => {
                 src="https://i.ibb.co.com/ZJtWmG6/277778447-3181088082162951-5751592929606037984-n.jpg"
                 alt="Mohammad Khairul Anam"
                 className="relative w-64 h-64 md:w-[20rem] md:h-[20rem] lg:w-[28rem] lg:h-[28rem] object-cover rounded-full
-              border-4 
-              hover:scale-105 transition duration-300"
+                border-4 
+                hover:scale-105 transition duration-300"
                 style={{
                   borderColor: isDarkMode
                     ? "var(--primary-light)"
@@ -150,7 +232,6 @@ const Home = ({ isDarkMode }) => {
           </motion.div>
         </div>
       </div>
-      
     </>
   );
 };
