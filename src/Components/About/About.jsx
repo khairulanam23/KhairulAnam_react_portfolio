@@ -105,7 +105,7 @@ const AboutAndExperience = () => {
                   <span className="text-[var(--primary-light)] font-semibold">
                     Mohammad Khairul Anam
                   </span>
-                  , a passionate Full Stack Developer specializing in building
+                  , a passionate Web Developer specializing in building
                   scalable and high-performance web applications. I am dedicated
                   to leveraging advanced technologies to create impactful user
                   experiences and deliver innovative solutions to complex

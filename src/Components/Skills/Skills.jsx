@@ -236,7 +236,6 @@ const SkillsCarousel = ({ isDarkMode }) => {
 
   // Water-themed colors
   const accentColor = isDarkMode ? "#1E90FF" : "#39B7FF";
-  const bgColor = isDarkMode ? "#0A1929" : "#E8F7FF";
   const textColor = isDarkMode ? "#E8F7FF" : "#0F4C75";
   const secondaryTextColor = isDarkMode ? "#A7D8FF" : "#3A7CA5";
   const cardBgColor = isDarkMode ? "#0D2137" : "#FFFFFF";
@@ -390,10 +389,7 @@ const SkillsCarousel = ({ isDarkMode }) => {
   };
 
   return (
-    <section
-      className="py-16 px-4"
-      style={{ backgroundColor: bgColor, color: textColor }}
-    >
+    <section className="py-16 px-4" style={{ color: textColor }}>
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -438,33 +434,8 @@ const SkillsCarousel = ({ isDarkMode }) => {
           </div>
         </motion.div>
 
-        {/* Skill Filter Options - water-themed */}
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {["All", "Frontend", "Backend", "Tools", "Languages"].map(
-            (filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className="px-4 py-2 rounded-full text-sm font-medium transition-all"
-                style={{
-                  backgroundColor:
-                    filter === activeFilter
-                      ? accentColor
-                      : isDarkMode
-                      ? "rgba(30, 144, 255, 0.1)"
-                      : "rgba(57, 183, 255, 0.1)",
-                  color: filter === activeFilter ? "#fff" : accentColor,
-                  boxShadow:
-                    filter === activeFilter
-                      ? `0 0 10px ${accentColor}40`
-                      : "none",
-                }}
-              >
-                {filter}
-              </button>
-            )
-          )}
-        </div>
+        {/* Use the renderFilterButtons function instead of duplicating code */}
+        {renderFilterButtons()}
 
         {/* Skills cards container */}
         <div className="relative" ref={containerRef}>
